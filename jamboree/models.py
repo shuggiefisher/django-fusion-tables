@@ -5,7 +5,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 
-from pyft.fusiontables import FusionTable, DEFAULT_TYPE_HANDLER
+from fusiontables import FusionTable, DEFAULT_TYPE_HANDLER
 from pyft.fields import NumberField
 from pyft.fields import StringField
 
@@ -54,7 +54,7 @@ def create_fusion_table(instance):
     return fusion_table
 
 DJANGO_TO_FUSION_TABLES_FIELD_TYPE_MAP = {
-    [django.db.models.fields.CharField]: StringField.column_type
+    ['django.db.models.fields.CharField']: StringField.column_type
 }
 
 def get_schema_from_model(django_model):
