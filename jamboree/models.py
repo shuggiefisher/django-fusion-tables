@@ -12,35 +12,19 @@ from django.dispatch import receiver
 from pyft.fusiontables import FusionTable, DEFAULT_TYPE_HANDLER
 from pyft.fields import NumberField, StringField, Row
 
+from admin import FusionTableExportAdmin
+
 log = logging.getLogger(__name__)
 
 # docs groups is a model admin which only lets you create groups from a set form
-
-def get_all_models():
-    all_models = []
-    from django.db.models import get_apps
-    for app in get_apps():
-        from django.db.models import get_models
-        for model in get_models(app):
-            new_object = model() # Create a object of type model
-            db_table_name = model._meta.db_table # Get the name of the model in the database
-
-            if type(model._meta.verbose_name) is str:
-                verbose_name = model._meta.verbose_name
-            else:
-                verbose_name = db_table_name
-
-            all_models.append((db_table_name, db_table_name))
-
-    return all_models
-
-all_models = get_all_models()
 
 class FusionTableExport(models.Model):
     django_model = models.ForeignKey(ContentType, null=False, blank=False, unique=True, related_name='fusion_table')
     fusion_table_id = models.CharField(null=True, blank=True, max_length=50)
     fusion_table_url = models.URLField(null=False, blank=True, max_length=500)
     read_group = models.ForeignKey(Group, null=True, blank=True)
+
+admin.site.register(FusionTableExport, FusionTableExportAdmin)
 
 class FusionTableRowId(models.Model):
     content_type = models.ForeignKey(ContentType)

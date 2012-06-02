@@ -1,13 +1,11 @@
-from django.contrib import admin
-from models import FusionTableExport
-from django import forms
+from django.contrib.admin import ModelAdmin
+from django.contrib.contenttypes.models import ContentType
+from django.forms import ModelForm
 
-class FusionTableExportAdminForm(forms.ModelForm):
+class FusionTableExportAdminForm(ModelForm):
     def __init__(self, *args, **kwargs):
-        self.fields['django_model'].choices = ContentType.objects.all().exclude(name='fusion table row id')
+        self.fields['django_model'].queryset = ContentType.objects.all().exclude(name='fusion table row id')
 
-class FusionTableExportAdmin(admin.ModelAdmin):
+class FusionTableExportAdmin(ModelAdmin):
     form = FusionTableExportAdminForm
     readonly_fields = ('fusion_table_id', 'fusion_table_url')
-
-admin.site.register(FusionTableExport, FusionTableExportAdmin)
