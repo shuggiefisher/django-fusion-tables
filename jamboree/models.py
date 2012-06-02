@@ -5,7 +5,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 
-from fusiontables import FusionTable, DEFAULT_TYPE_HANDLER
+from pyft.fusiontables import FusionTable, DEFAULT_TYPE_HANDLER
 from pyft.fields import NumberField
 from pyft.fields import StringField
 
