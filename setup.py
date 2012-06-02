@@ -10,7 +10,7 @@ setup(
     author_email='rob@socket2em.com',
     url='http://github.com/shuggiefisher/django-jamboree',
     description="Export django models to google fusion tables",
-    long_description=open('README.txt').read(),
+    long_description=open('README.rst').read(),
     zip_safe=False,
     include_package_data=True,
     install_requires=[
