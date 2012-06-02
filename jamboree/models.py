@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import Group
+from django.contrib import admin
 from django.contrib.contenttypes.models import ContentType
 
 from django.db.models.signals import pre_save
@@ -39,6 +40,8 @@ class FusionTablesExports(models.Model):
     fusion_table_url = models.URLField(null=False, blank=False, max_length=500, editable=False)
     read_group = models.ForeignKey(Group, null=True, blank=True)
 
+admin.site.register(FusionTablesExports)
+
 @receiver(pre_save, sender=FusionTablesExports)
 def add_fusion_table(sender, instance, **kwargs):
     if not instance._entity_exists:
@@ -54,7 +57,7 @@ def create_fusion_table(instance):
     return fusion_table
 
 DJANGO_TO_FUSION_TABLES_FIELD_TYPE_MAP = {
-    ['django.db.models.fields.CharField']: StringField.column_type
+    'django.db.models.fields.CharField': StringField.column_type
 }
 
 def get_schema_from_model(django_model):
