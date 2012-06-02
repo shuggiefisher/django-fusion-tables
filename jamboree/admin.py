@@ -1,5 +1,5 @@
 from django.contrib import admin
-from models import FusionTableExport, FusionTableRowId
+from models import FusionTableExport
 from django import forms
 
 class FusionTableExportAdminForm(forms.ModelForm):
