@@ -18,6 +18,8 @@ log = logging.getLogger(__name__)
 
 class FusionTableExport(models.Model):
     django_model = models.ForeignKey(ContentType, null=False, blank=False, unique=True, related_name='fusion_table')
+    # this field ought to be immutable
+
     fusion_table_id = models.PositiveIntegerField(null=True, blank=True, max_length=50)
     fusion_table_url = models.URLField(null=False, blank=True, max_length=500)
     read_group = models.ForeignKey(Group, null=True, blank=True)
@@ -100,6 +102,8 @@ def fusion_model_row_delete(sender, instance, **kwargs):
             #delete_rows(sender_fusion_table.table_id, [instance])
         except FusionTableExport.DoesNotExist:
             pass
+    elif sender is FusionTableExport:
+        # delete all the FusionTableRowId associated with the Model
 
 
 def insert_rows(table_id, instances, fusion_table=None):
@@ -145,3 +149,6 @@ def build_fields_for_row(instance):
         # create a field using the Django->FusionTable map and set it's value
         fusion_table_fields.append(schema[field.name](getattr(instance, field.name), column_name=field.name))
     return fusion_table_fields
+
+def delete_rows():
+    # also need to delete related instances in FusionTableRowId table
