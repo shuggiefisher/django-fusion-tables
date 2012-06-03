@@ -1,7 +1,7 @@
 import logging
 
 from pyft.fusiontables import FusionTable, DEFAULT_TYPE_HANDLER
-from pyft.fields import NumberField, StringField, Row
+from pyft.fields import NumberField, StringField, DatetimeField, Row
 from pyft.client.sql.sqlbuilder import SQL
 
 from django.contrib.contenttypes.models import ContentType
@@ -11,7 +11,18 @@ from models import FusionTableRowId
 log = logging.getLogger(__name__)
 
 DJANGO_TO_FUSION_TABLES_FIELD_TYPE_MAP = {
-    'django.db.models.fields.CharField': StringField
+    'django.db.models.fields.CharField': StringField,
+    'django.db.models.fields.AutoField': NumberField, # assume pk is a number
+    'django.db.models.fields.DecimalField': NumberField,
+    'django.db.models.fields.FloatField': NumberField,
+    'django.db.models.fields.IntegerField': NumberField,
+    'django.db.models.fields.SmallIntegerField': NumberField,
+    'django.db.models.fields.BigIntegerField': NumberField,
+    'django.db.models.fields.PositiveIntegerField': NumberField,
+    'django.db.models.fields.PositiveSmallIntegerField': NumberField,
+    'django.db.models.fields.DateField': DatetimeField,
+    'django.db.models.fields.DateTimeField': DatetimeField,
+    'django.db.models.fields.TimeField': DatetimeField,
 }
 
 def create_fusion_table(instance):
