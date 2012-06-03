@@ -15,8 +15,14 @@ class FusionTableExportAdminForm(ModelForm):
         model = FusionTableExport
 
 class FusionTableExportAdmin(admin.ModelAdmin):
+
+    def fusion_table_link(self, obj):
+        return '<a href="%s">%s</a>' % (obj.fusion_table_url, obj.fusion_table_url)
+    fusion_table_link.allow_tags = True
+
     form = FusionTableExportAdminForm
     readonly_fields = ('fusion_table_id', 'fusion_table_url')
+    list_display = ('django_model', 'read_group', 'fusion_table_link',)
 
 admin.site.register(FusionTableExport, FusionTableExportAdmin)
 admin.site.register(FusionTableRowId)

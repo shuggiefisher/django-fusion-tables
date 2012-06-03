@@ -2,7 +2,6 @@ import logging
 
 from django.db import models
 from django.contrib.auth.models import Group
-from django.contrib import admin
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
 
@@ -11,6 +10,7 @@ from django.dispatch import receiver
 
 from pyft.fusiontables import FusionTable, DEFAULT_TYPE_HANDLER
 from pyft.fields import NumberField, StringField, Row
+from pyft.client.sql.sqlbuilder import SQL
 
 log = logging.getLogger(__name__)
 
@@ -89,24 +89,28 @@ def fusion_model_change(sender, instance, created, **kwargs):
         if created is True:
             insert_rows(sender_fusion_table.fusion_table_id, [instance])
         else:
-            update_rows(sender_fusion_table.fusion_table_id, [instance])
+            update_row(sender_fusion_table.fusion_table_id, instance)
     except FusionTableExport.DoesNotExist:
         pass
 
 @receiver(post_delete)
 def fusion_model_row_delete(sender, instance, **kwargs):
+    sender_type = ContentType.objects.get_for_model(sender)
     if sender not in [FusionTableExport, FusionTableRowId]:
-        sender_type = ContentType.objects.get_for_model(sender)
         try:
             sender_fusion_table = sender_type.fusion_table.exclude(fusion_table_id=None).get()
-            #delete_rows(sender_fusion_table.table_id, [instance])
+            delete_row(sender_fusion_table.table_id, instance)
         except FusionTableExport.DoesNotExist:
             pass
     elif sender is FusionTableExport:
-        # delete all the FusionTableRowId associated with the Model
+        # delete all the FusionTableRowIds associated with the sender Model
+        FusionTableRowId.objects.filter(content_type = sender_type).delete()
 
 
 def insert_rows(table_id, instances, fusion_table=None):
+    """
+    Insert rows in a batch
+    """
     if fusion_table is None:
         fusion_table = FusionTable(table_id)
     rows = []
@@ -123,20 +127,18 @@ def insert_rows(table_id, instances, fusion_table=None):
                                                row_id = row_id)
         fusion_table_row_id.save()
 
-def update_rows(table_id, instances):
+def update_row(table_id, instance):
+    """
+    This generates on query per updated row
+    """
     fusion_table = FusionTable(table_id)
-    instance_content_type = ContentType.objects.get_for_model(instances[0])
+    instance_content_type = ContentType.objects.get_for_model(instance)
 
     rows = []
-    for instance in instances:
+    row_id = get_fusion_table_row_id_for_instance(instance_content_type, instance)
+    if row_id is not None:
         fusion_table_fields = build_fields_for_row(instance)
-        try:
-            row_id = FusionTableRowId.objects\
-                        .get(content_type = instance_content_type, object_id = instance.pk).row_id
-            rows.append(Row(row_id=row_id, fields=fusion_table_fields))
-        except FusionTableRowId.DoesNotExist:
-            log.error('Could not find the fusion table row id for existing %s instance pk : %s'
-                            %(instance_content_type, instance.pk))
+        rows.append(Row(row_id=row_id, fields=fusion_table_fields))
 
     fusion_table.update(rows)
 
@@ -150,5 +152,31 @@ def build_fields_for_row(instance):
         fusion_table_fields.append(schema[field.name](getattr(instance, field.name), column_name=field.name))
     return fusion_table_fields
 
-def delete_rows():
-    # also need to delete related instances in FusionTableRowId table
+def get_fusion_table_row_id_for_instance(content_type, instance):
+    try:
+        row_id = FusionTableRowId.objects\
+                    .get(content_type = content_type, object_id = instance.pk).row_id
+        return row_id
+    except FusionTableRowId.DoesNotExist:
+        log.error('Could not find the fusion table row id for existing %s instance pk : %s'
+                        %(content_type, instance.pk))
+        return None
+
+def delete_row(table_id, instances):
+    """
+    This creates one query per delete so could potentially be very slow.
+    If you need to delete rows in batches it would be better to add a method
+    to the pyft library following the pattern for insert() batches
+    """
+    fusion_table = FusionTable(table_id)
+    table_content_type = ContentType.objects.get_for_model(instances[0])
+
+    rows = []
+    for instance in instances:
+        row_id = get_fusion_table_row_id_for_instance(table_content_type, instance)
+        if row_id is not None:
+            query = SQL().delete(table_id, row_id)
+            fusion_table.run_query(query)
+            FusionTableRowId.objects\
+                    .get(content_type = content_type, object_id = instance.pk)\
+                    .delete()
