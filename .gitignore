@@ -13,3 +13,4 @@
 /dist/
 /test.db
 /temp.db
+/django_jamboree.egg-info/

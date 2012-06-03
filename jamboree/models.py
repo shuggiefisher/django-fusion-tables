@@ -5,7 +5,7 @@ from django.contrib.auth.models import Group
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
 
-from django.db.models.signals import pre_save, post_save, post_delete
+from django.db.models.signals import pre_save, post_save, pre_delete
 from django.dispatch import receiver
 
 from pyft.fusiontables import FusionTable, DEFAULT_TYPE_HANDLER
@@ -93,13 +93,13 @@ def fusion_model_change(sender, instance, created, **kwargs):
     except FusionTableExport.DoesNotExist:
         pass
 
-@receiver(post_delete)
+@receiver(pre_delete)
 def fusion_model_row_delete(sender, instance, **kwargs):
     sender_type = ContentType.objects.get_for_model(sender)
     if sender not in [FusionTableExport, FusionTableRowId]:
         try:
             sender_fusion_table = sender_type.fusion_table.exclude(fusion_table_id=None).get()
-            delete_row(sender_fusion_table.table_id, instance)
+            delete_row(sender_fusion_table.fusion_table_id, instance)
         except FusionTableExport.DoesNotExist:
             pass
     elif sender is FusionTableExport:
@@ -162,21 +162,19 @@ def get_fusion_table_row_id_for_instance(content_type, instance):
                         %(content_type, instance.pk))
         return None
 
-def delete_row(table_id, instances):
+def delete_row(table_id, instance):
     """
     This creates one query per delete so could potentially be very slow.
     If you need to delete rows in batches it would be better to add a method
     to the pyft library following the pattern for insert() batches
     """
     fusion_table = FusionTable(table_id)
-    table_content_type = ContentType.objects.get_for_model(instances[0])
+    table_content_type = ContentType.objects.get_for_model(instance)
 
-    rows = []
-    for instance in instances:
-        row_id = get_fusion_table_row_id_for_instance(table_content_type, instance)
-        if row_id is not None:
-            query = SQL().delete(table_id, row_id)
-            fusion_table.run_query(query)
-            FusionTableRowId.objects\
-                    .get(content_type = content_type, object_id = instance.pk)\
-                    .delete()
+    row_id = get_fusion_table_row_id_for_instance(table_content_type, instance)
+    if row_id is not None:
+        query = SQL().delete(table_id, row_id)
+        fusion_table.run_query(query)
+        FusionTableRowId.objects\
+                .get(content_type = table_content_type, object_id = instance.pk)\
+                .delete()
