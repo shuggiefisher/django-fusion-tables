@@ -8,6 +8,11 @@ To install in your virtual environment:
 
     pip install -e git+git@github.com:shuggiefisher/django-fusion-tables.git#egg=django-fusion-tables
 
+Install the dependencies:
+
+    pip install -e git+git@github.com:shuggiefisher/python-fusiontables@97983cea0f1e8c3bed6549212f39035cd3a32b31#egg=python-fusiontables
+    pip install -e git+git@github.com:shuggiefisher/python-fusion-tables-client@bc89c03181ac800b20073a5ad2724c104aea0e68#egg=python-fusion-tables-client
+
 and add 'djangofusiontables' to your INSTALLED_APPS in settings.py
 
 Add a file named pyftconfig.py to the root of your project containing:
