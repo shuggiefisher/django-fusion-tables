@@ -13,9 +13,7 @@ setup(
     long_description=open('README.rst').read(),
     include_package_data=True,
     zip_safe=False,
-    install_requires=[
-        "python-fusiontables",
-    ],
+    install_requires=[],
     dependency_links = [
         'http://github.com/shuggiefisher/python-fusiontables/tarball/master#egg=python-fusiontables',
     ]
