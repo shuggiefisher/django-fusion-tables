@@ -17,7 +17,9 @@ and add 'djangofusiontables' to your INSTALLED_APPS in settings.py
 Add a file named pyftconfig.py to the root of your project containing:
 
     PYFT_GOOGLE_USERNAME="myaccount@gmail.com"
-    PYFT_GOOGLE_PASSWORD="mypassword"
+    PYFT_GOOGLE_PASSWORD="my_application_specific_password"
+
+You can generate your application-specific-password at http://accounts.google.com
 
 To export a model to a Google Fusion Table
 
