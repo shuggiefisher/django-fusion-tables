@@ -1,3 +1,0 @@
-[submodule "lib/fusiontables"]
-	path = lib/fusiontables
-	url = git@github.com:shuggiefisher/python-fusiontables.git
