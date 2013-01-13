@@ -7,11 +7,11 @@ class FusionTableExport(models.Model):
     django_model = models.ForeignKey(ContentType, null=False, blank=False, unique=True, related_name='fusion_table')
     # this field ought to be immutable
 
-    fusion_table_id = models.PositiveIntegerField(null=True, blank=True, max_length=50)
+    fusion_table_id = models.CharField(null=True, blank=True, max_length=50)
     fusion_table_url = models.URLField(null=False, blank=True, max_length=500)
 
     def __unicode__(self):
-        return "%s : %s : %s" %(self.django_model, self.read_group, self.fusion_table_id)
+        return "%s : %s" %(self.django_model, self.fusion_table_id)
 
 class FusionTableRowId(models.Model):
     content_type = models.ForeignKey(ContentType)

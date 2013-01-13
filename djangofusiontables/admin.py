@@ -22,7 +22,7 @@ class FusionTableExportAdmin(admin.ModelAdmin):
 
     form = FusionTableExportAdminForm
     readonly_fields = ('fusion_table_id', 'fusion_table_url')
-    list_display = ('django_model', 'read_group', 'fusion_table_link',)
+    list_display = ('django_model', 'fusion_table_link',)
 
 admin.site.register(FusionTableExport, FusionTableExportAdmin)
 admin.site.register(FusionTableRowId)

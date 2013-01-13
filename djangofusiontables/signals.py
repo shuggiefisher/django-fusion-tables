@@ -11,7 +11,7 @@ def add_fusion_table(sender, instance, **kwargs):
         # ought to check that the fusion table models have not been added
         fusion_table = create_fusion_table(instance)
         instance.fusion_table_id = fusion_table.table_id
-        instance.fusion_table_url = "https://www.google.com/fusiontables/DataSource?dsrcid=%s" %fusion_table.table_id
+        instance.fusion_table_url = "https://www.google.com/fusiontables/data?docid=%s" %fusion_table.table_id
 
 @receiver(post_save)
 def fusion_model_change(sender, instance, created, **kwargs):
