@@ -25,19 +25,20 @@ def add_fusion_table(sender, instance, **kwargs):
 @receiver(post_save)
 def fusion_model_change(sender, instance, created, **kwargs):
     from fusiontables import insert_rows, update_row
-    sender_type = ContentType.objects.get_for_model(sender)
-    try:
-        sender_fusion_table = sender_type.fusion_table.exclude(fusion_table_id=None).get()
-    except FusionTableExport.DoesNotExist:
-        pass
-    else:
+    if sender is not None:
+        sender_type = ContentType.objects.get_for_model(sender)
         try:
-            if created is True:
-                insert_rows(sender_fusion_table.fusion_table_id, [instance])
-            else:
-                update_row(sender_fusion_table.fusion_table_id, instance)
-        except URLError:
-            logging.warning("Syncing rows to fusion table failed.  Perhaps you are offline?")
+            sender_fusion_table = sender_type.fusion_table.exclude(fusion_table_id=None).get()
+        except FusionTableExport.DoesNotExist:
+            pass
+        else:
+            try:
+                if created is True:
+                    insert_rows(sender_fusion_table.fusion_table_id, [instance])
+                else:
+                    update_row(sender_fusion_table.fusion_table_id, instance)
+            except URLError:
+                logging.warning("Syncing rows to fusion table failed.  Perhaps you are offline?")
 
 
 @receiver(pre_delete)
